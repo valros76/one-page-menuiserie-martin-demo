@@ -1,0 +1,82 @@
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-SSL} !on
+RewriteCond %{HTTP_HOST} ^www\.%{HTTP_HOST}%$
+RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+RewriteRule ^[^.]+$ index.html [L]
+
+#CSP (politique anti-XSS)
+# Si erreur pour requpete bloquée, à cause d'un "sha-loremipsum", il faut remplacer les sha dans le script-src (à chaque fois qu'un caractère change dans ces scripts).
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://fonts.googleapis.com https://www.termsfeed.com https://www.googletagmanager.com https://maps.app.goo.gl https://www.google.com https://www.linkedin.com https://blog.webdevoo.com https://www.societe.com https://www.planethoster.com https://analytics.google.com https://www.google-analytics.com 'sha256-KcFqodCHV88Uztq+EPTaBOxfknazzsum/gkYpbYM3Fc=' 'sha256-3TCibQEwWNCB24vwzmRnkJZQ3Y9Byg5CZ4KgWjnBcQI='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google.com; connect-src 'self' https://analytics.google.com https://stats.g.doubleclick.net https://www.google-analytics.com https://www.googletagmanager.com https://region1.analytics.google.com;"
+
+#Fichier .htaccess : /dossier_no3/
+# Use HTTP Strict Transport Security to force client to use secure connections only
+Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" env=HTTPS
+
+options -indexes
+
+#Activation du Mod Deflate
+<IfModule mod_deflate.c>
+  # Compresse les fichiers HTML, CSS, JavaScript, Text, XML et les fonts 
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/rss+xml
+  AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+  AddOutputFilterByType DEFLATE application/x-font
+  AddOutputFilterByType DEFLATE application/x-font-opentype
+  AddOutputFilterByType DEFLATE application/x-font-otf
+  AddOutputFilterByType DEFLATE application/x-font-truetype
+  AddOutputFilterByType DEFLATE application/x-font-ttf
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE font/opentype
+  AddOutputFilterByType DEFLATE font/otf
+  AddOutputFilterByType DEFLATE font/ttf
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE image/x-icon
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/xml
+
+  # Ce code est pour assurer une compatibilité avec les anciens navigateurs
+  BrowserMatch ^Mozilla/4 gzip-only-text/html
+  BrowserMatch ^Mozilla/4\.0[678] no-gzip
+  BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+  Header append Vary User-Agent
+</IfModule>
+
+# les proxys ne doivent pas décompresser le contenu à la place de l'internaute
+Header append Vary User-Agent env=!dont-vary
+
+<IfModule mod_headers.c>
+  # Prends en compte les polices (formats récents)
+  AddType application/x-font-woff .woff
+  AddType application/x-font-woff2 .woff2
+  # active la mise en cache
+  ExpiresActive On
+  ExpiresDefault "access plus 1800 seconds"
+  # met à 1 an la durée du cache pour les images, le SVG et les polices d’écriture
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType application/x-font-woff "access plus 1 year"
+  ExpiresByType application/x-font-ttf "access plus 1 year"
+  # met à 1 mois la durée du cache pour les CSS et JS
+  ExpiresByType text/css "access plus 1 month"
+  Header set Access-Control-Allow-Origin "*"
+  Header always set X-FRAME-OPTIONS "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header set Connection keep-alive
+  <FilesMatch "\.(jpeg,webp,png,gif,svg+xml,x-icon)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header always set X-FRAME-OPTIONS "ALLOW FROM *"
+    Header always set X-Content-Type-Options "nosniff"
+    Header set Connection keep-alive
+  </FilesMatch>
+</IfModule>

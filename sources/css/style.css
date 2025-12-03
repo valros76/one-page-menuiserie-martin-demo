@@ -316,7 +316,7 @@ nav {
 .hero {
   height: 100vh;
   min-height: 37.5rem;
-  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://placehold.co/1920x1080') no-repeat center center/cover;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../assets/images/hero-banner-menuiserie-martin.png') no-repeat center center/cover;
   display: flex;
   align-items: center;
   justify-content: center;
